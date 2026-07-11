@@ -547,5 +547,440 @@ def create_appointment(
     )
 
 
+# ---------------------------------------------------------------------------
+# Users, workflows & campaigns
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_users() -> dict:
+    """List the users (team members) of the location."""
+    return _request("GET", "/users/", params={"locationId": _location_id()})
+
+
+@mcp.tool
+def list_workflows() -> dict:
+    """List the location's workflows (automations). Workflow IDs are needed to
+    add or remove contacts from a workflow."""
+    return _request("GET", "/workflows/", params={"locationId": _location_id()})
+
+
+@mcp.tool
+def add_contact_to_workflow(
+    contact_id: str, workflow_id: str, event_start_time: str | None = None
+) -> dict:
+    """Add a contact to a workflow (starts the automation for them).
+
+    Args:
+        contact_id: The contact to enroll.
+        workflow_id: The workflow to enroll them in (see list_workflows).
+        event_start_time: Optional start time in ISO 8601 with offset
+            (e.g. 2026-07-15T10:00:00-05:00).
+    """
+    return _request(
+        "POST",
+        f"/contacts/{contact_id}/workflow/{workflow_id}",
+        json={"eventStartTime": event_start_time},
+    )
+
+
+@mcp.tool
+def remove_contact_from_workflow(contact_id: str, workflow_id: str) -> dict:
+    """Remove a contact from a workflow (stops the automation for them)."""
+    return _request("DELETE", f"/contacts/{contact_id}/workflow/{workflow_id}")
+
+
+@mcp.tool
+def list_campaigns(status: str | None = None) -> dict:
+    """List the location's campaigns. Optionally filter by status
+    ("published" or "draft")."""
+    return _request(
+        "GET", "/campaigns/", params={"locationId": _location_id(), "status": status}
+    )
+
+
+@mcp.tool
+def add_contact_to_campaign(contact_id: str, campaign_id: str) -> dict:
+    """Add a contact to a campaign."""
+    return _request("POST", f"/contacts/{contact_id}/campaigns/{campaign_id}")
+
+
+@mcp.tool
+def remove_contact_from_campaign(contact_id: str, campaign_id: str) -> dict:
+    """Remove a contact from a campaign."""
+    return _request("DELETE", f"/contacts/{contact_id}/campaigns/{campaign_id}")
+
+
+# ---------------------------------------------------------------------------
+# Forms & surveys
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_forms(limit: int = 20, skip: int = 0) -> dict:
+    """List the location's forms."""
+    return _request(
+        "GET",
+        "/forms/",
+        params={"locationId": _location_id(), "limit": limit, "skip": skip},
+    )
+
+
+@mcp.tool
+def list_form_submissions(
+    form_id: str | None = None,
+    query: str | None = None,
+    start_at: str | None = None,
+    end_at: str | None = None,
+    limit: int = 20,
+    page: int = 1,
+) -> dict:
+    """List form submissions in the location.
+
+    Args:
+        form_id: Filter to one form.
+        query: Free-text filter on contact name, email, or phone.
+        start_at: Range start date (YYYY-MM-DD).
+        end_at: Range end date (YYYY-MM-DD).
+        limit: Results per page.
+        page: Page number.
+    """
+    return _request(
+        "GET",
+        "/forms/submissions",
+        params={
+            "locationId": _location_id(),
+            "formId": form_id,
+            "q": query,
+            "startAt": start_at,
+            "endAt": end_at,
+            "limit": limit,
+            "page": page,
+        },
+    )
+
+
+@mcp.tool
+def list_surveys(limit: int = 20, skip: int = 0) -> dict:
+    """List the location's surveys."""
+    return _request(
+        "GET",
+        "/surveys/",
+        params={"locationId": _location_id(), "limit": limit, "skip": skip},
+    )
+
+
+@mcp.tool
+def list_survey_submissions(
+    survey_id: str | None = None, limit: int = 20, page: int = 1
+) -> dict:
+    """List survey submissions in the location, optionally filtered to one
+    survey."""
+    return _request(
+        "GET",
+        "/surveys/submissions",
+        params={
+            "locationId": _location_id(),
+            "surveyId": survey_id,
+            "limit": limit,
+            "page": page,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Funnels, trigger links & media
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_funnels(limit: int = 20, offset: int = 0) -> dict:
+    """List the location's funnels."""
+    return _request(
+        "GET",
+        "/funnels/funnel/list",
+        params={"locationId": _location_id(), "limit": limit, "offset": offset},
+    )
+
+
+@mcp.tool
+def list_funnel_pages(funnel_id: str, limit: int = 20, offset: int = 0) -> dict:
+    """List the pages of a funnel."""
+    return _request(
+        "GET",
+        "/funnels/page",
+        params={
+            "locationId": _location_id(),
+            "funnelId": funnel_id,
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+
+@mcp.tool
+def list_trigger_links() -> dict:
+    """List the location's trigger links."""
+    return _request("GET", "/links/", params={"locationId": _location_id()})
+
+
+@mcp.tool
+def create_trigger_link(name: str, redirect_to: str) -> dict:
+    """Create a trigger link that redirects to the given URL."""
+    return _request(
+        "POST",
+        "/links/",
+        json={
+            "locationId": _location_id(),
+            "name": name,
+            "redirectTo": redirect_to,
+        },
+    )
+
+
+@mcp.tool
+def list_media_files(
+    limit: int = 20,
+    offset: int = 0,
+    query: str | None = None,
+) -> dict:
+    """List files in the location's media library."""
+    return _request(
+        "GET",
+        "/medias/files",
+        params={
+            "altType": "location",
+            "altId": _location_id(),
+            "sortBy": "createdAt",
+            "sortOrder": "desc",
+            "limit": limit,
+            "offset": offset,
+            "query": query,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Custom values & businesses
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_custom_values() -> dict:
+    """List the location's custom values (merge-field style key/value pairs
+    usable across the account)."""
+    return _request("GET", f"/locations/{_location_id()}/customValues")
+
+
+@mcp.tool
+def create_custom_value(name: str, value: str) -> dict:
+    """Create a custom value in the location."""
+    return _request(
+        "POST",
+        f"/locations/{_location_id()}/customValues",
+        json={"name": name, "value": value},
+    )
+
+
+@mcp.tool
+def update_custom_value(custom_value_id: str, name: str, value: str) -> dict:
+    """Update an existing custom value by ID."""
+    return _request(
+        "PUT",
+        f"/locations/{_location_id()}/customValues/{custom_value_id}",
+        json={"name": name, "value": value},
+    )
+
+
+@mcp.tool
+def list_businesses() -> dict:
+    """List businesses (companies) in the location."""
+    return _request("GET", "/businesses/", params={"locationId": _location_id()})
+
+
+# ---------------------------------------------------------------------------
+# Products, invoices & payments
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_products(limit: int = 20, offset: int = 0, query: str | None = None) -> dict:
+    """List the location's products."""
+    return _request(
+        "GET",
+        "/products/",
+        params={
+            "locationId": _location_id(),
+            "limit": limit,
+            "offset": offset,
+            "search": query,
+        },
+    )
+
+
+@mcp.tool
+def get_product(product_id: str) -> dict:
+    """Get a product by ID, including its details."""
+    return _request(
+        "GET", f"/products/{product_id}", params={"locationId": _location_id()}
+    )
+
+
+@mcp.tool
+def list_product_prices(product_id: str, limit: int = 20, offset: int = 0) -> dict:
+    """List the prices attached to a product."""
+    return _request(
+        "GET",
+        f"/products/{product_id}/price",
+        params={"locationId": _location_id(), "limit": limit, "offset": offset},
+    )
+
+
+@mcp.tool
+def list_invoices(
+    status: str | None = None, limit: int = 20, offset: int = 0
+) -> dict:
+    """List the location's invoices. Optionally filter by status (e.g.
+    "draft", "sent", "paid", "void", "partially_paid")."""
+    return _request(
+        "GET",
+        "/invoices/",
+        params={
+            "altId": _location_id(),
+            "altType": "location",
+            "status": status,
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+
+@mcp.tool
+def get_invoice(invoice_id: str) -> dict:
+    """Get an invoice by ID."""
+    return _request(
+        "GET",
+        f"/invoices/{invoice_id}",
+        params={"altId": _location_id(), "altType": "location"},
+    )
+
+
+@mcp.tool
+def list_payment_orders(limit: int = 20, offset: int = 0) -> dict:
+    """List payment orders in the location."""
+    return _request(
+        "GET",
+        "/payments/orders",
+        params={
+            "altId": _location_id(),
+            "altType": "location",
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+
+@mcp.tool
+def list_payment_transactions(limit: int = 20, offset: int = 0) -> dict:
+    """List payment transactions in the location."""
+    return _request(
+        "GET",
+        "/payments/transactions",
+        params={
+            "altId": _location_id(),
+            "altType": "location",
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+
+@mcp.tool
+def list_payment_subscriptions(limit: int = 20, offset: int = 0) -> dict:
+    """List payment subscriptions in the location."""
+    return _request(
+        "GET",
+        "/payments/subscriptions",
+        params={
+            "altId": _location_id(),
+            "altType": "location",
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Extra calendar & contact helpers
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_calendar_groups() -> dict:
+    """List the location's calendar groups."""
+    return _request(
+        "GET", "/calendars/groups", params={"locationId": _location_id()}
+    )
+
+
+@mcp.tool
+def list_contact_appointments(contact_id: str) -> dict:
+    """List all appointments booked for a contact."""
+    return _request("GET", f"/contacts/{contact_id}/appointments")
+
+
+# ---------------------------------------------------------------------------
+# Universal escape hatch — any GHL API v2 endpoint
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def ghl_api_request(
+    method: str,
+    path: str,
+    query_params: dict | None = None,
+    body: dict | None = None,
+    api_version: str = DEFAULT_API_VERSION,
+) -> dict:
+    """Call ANY GoHighLevel API v2 endpoint directly. Use this for any GHL
+    action that doesn't have a dedicated tool — it can reach every endpoint
+    the Private Integration Token's scopes allow (blogs, courses, social
+    planner, email templates, snapshots, estimates, etc.). API reference:
+    https://highlevel.stoplight.io/docs/integrations
+
+    Args:
+        method: HTTP method: "GET", "POST", "PUT", "PATCH", or "DELETE".
+        path: Endpoint path starting with "/", e.g. "/contacts/" or
+            "/social-media-posting/{locationId}/posts/list". The literal
+            placeholder "{locationId}" is replaced with the configured
+            location ID.
+        query_params: Query string parameters. Many GHL list endpoints
+            require "locationId" (or "altId" + "altType": "location") — the
+            configured location ID is auto-filled for the common
+            "locationId"/"altId" keys if you pass the literal value
+            "{locationId}".
+        body: JSON request body for POST/PUT/PATCH.
+        api_version: The dated Version header. Default "2021-07-28";
+            conversation endpoints need "2021-04-15".
+    """
+    location_id = _location_id()
+    path = path.replace("{locationId}", location_id)
+
+    def _fill(d: dict | None) -> dict | None:
+        if not d:
+            return d
+        return {
+            k: (location_id if v == "{locationId}" else v) for k, v in d.items()
+        }
+
+    return _request(
+        method.upper(),
+        path,
+        params=_fill(query_params),
+        json=_fill(body),
+        api_version=api_version,
+    )
+
+
 if __name__ == "__main__":
     mcp.run()

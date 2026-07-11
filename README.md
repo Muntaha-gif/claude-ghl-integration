@@ -9,12 +9,17 @@ a single sub-account (location).
 
 | Area | Tools |
 |---|---|
-| Location | `get_location`, `list_tags`, `list_custom_fields` |
+| Location | `get_location`, `list_tags`, `list_custom_fields`, `list_custom_values`, `create_custom_value`, `update_custom_value`, `list_businesses` |
 | Contacts | `search_contacts`, `get_contact`, `create_contact`, `update_contact`, `delete_contact`, `add_contact_tags`, `remove_contact_tags` |
 | Tasks & notes | `list_contact_tasks`, `create_contact_task`, `list_contact_notes`, `create_contact_note` |
 | Conversations | `search_conversations`, `get_conversation_messages`, `send_message` (SMS, Email, WhatsApp, IG, FB, Live Chat) |
 | Opportunities | `list_pipelines`, `search_opportunities`, `get_opportunity`, `create_opportunity`, `update_opportunity` |
-| Calendars | `list_calendars`, `get_free_slots`, `list_calendar_events`, `create_appointment` |
+| Calendars | `list_calendars`, `list_calendar_groups`, `get_free_slots`, `list_calendar_events`, `create_appointment`, `list_contact_appointments` |
+| Users & automations | `list_users`, `list_workflows`, `add_contact_to_workflow`, `remove_contact_from_workflow`, `list_campaigns`, `add_contact_to_campaign`, `remove_contact_from_campaign` |
+| Forms & surveys | `list_forms`, `list_form_submissions`, `list_surveys`, `list_survey_submissions` |
+| Funnels & links | `list_funnels`, `list_funnel_pages`, `list_trigger_links`, `create_trigger_link`, `list_media_files` |
+| Products & payments | `list_products`, `get_product`, `list_product_prices`, `list_invoices`, `get_invoice`, `list_payment_orders`, `list_payment_transactions`, `list_payment_subscriptions` |
+| **Everything else** | `ghl_api_request` — a universal tool that can call **any** GHL API v2 endpoint your PIT scopes allow (blogs, courses, social planner, email templates, estimates, snapshots, …) |
 
 ## 1. Get your GHL credentials
 
