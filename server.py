@@ -930,6 +930,113 @@ def list_contact_appointments(contact_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Social Planner (social media posting)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+def list_social_accounts() -> dict:
+    """List the social media accounts and groups connected to the location's
+    Social Planner (Facebook, Instagram, LinkedIn, X/Twitter, TikTok, Google
+    Business Profile, etc.). Account IDs are needed to create posts."""
+    return _request(
+        "GET", f"/social-media-posting/{_location_id()}/accounts"
+    )
+
+
+@mcp.tool
+def list_social_posts(
+    post_type: str = "all",
+    from_date: str | None = None,
+    to_date: str | None = None,
+    limit: int = 10,
+    skip: int = 0,
+) -> dict:
+    """List Social Planner posts in a date range.
+
+    Args:
+        post_type: Filter: "all", "recent", "upcoming", "draft", "failed",
+            "in_review", "notes", "in_progress", or "deleted".
+        from_date: Range start in ISO 8601 (e.g. 2026-07-01T00:00:00Z).
+            Defaults to 30 days ago.
+        to_date: Range end in ISO 8601. Defaults to 30 days from now.
+        limit: Results per page.
+        skip: Results to skip (pagination).
+    """
+    from datetime import datetime, timedelta, timezone as tz
+
+    now = datetime.now(tz.utc)
+    fmt = "%Y-%m-%dT%H:%M:%S.000Z"
+    return _request(
+        "POST",
+        f"/social-media-posting/{_location_id()}/posts/list",
+        json={
+            "type": post_type,
+            "accounts": "",
+            "skip": str(skip),
+            "limit": str(limit),
+            "fromDate": from_date or (now - timedelta(days=30)).strftime(fmt),
+            "toDate": to_date or (now + timedelta(days=30)).strftime(fmt),
+            "includeUsers": "true",
+        },
+    )
+
+
+@mcp.tool
+def get_social_post(post_id: str) -> dict:
+    """Get a single Social Planner post by ID."""
+    return _request(
+        "GET", f"/social-media-posting/{_location_id()}/posts/{post_id}"
+    )
+
+
+@mcp.tool
+def create_social_post(
+    account_ids: list[str],
+    summary: str,
+    status: str = "draft",
+    schedule_date: str | None = None,
+    media_urls: list[str] | None = None,
+    follow_up_comment: str | None = None,
+) -> dict:
+    """Create a Social Planner post on one or more connected accounts. This
+    can publish real posts — confirm content before calling.
+
+    Args:
+        account_ids: Social account IDs to post to (see list_social_accounts).
+        summary: The post text/caption.
+        status: "draft" (safe default), "scheduled" (requires schedule_date),
+            or "published" (posts immediately).
+        schedule_date: When to publish, ISO 8601 (e.g. 2026-07-15T10:00:00Z).
+            Required when status is "scheduled".
+        media_urls: Public URLs of images/videos to attach.
+        follow_up_comment: Optional first comment to add after publishing.
+    """
+    body: dict[str, Any] = {
+        "accountIds": account_ids,
+        "summary": summary,
+        "status": status,
+        "type": "post",
+        "userId": None,
+        "scheduleDate": schedule_date,
+        "followUpComment": follow_up_comment,
+    }
+    if media_urls:
+        body["media"] = [{"url": url} for url in media_urls]
+    return _request(
+        "POST", f"/social-media-posting/{_location_id()}/posts", json=body
+    )
+
+
+@mcp.tool
+def delete_social_post(post_id: str) -> dict:
+    """Delete a Social Planner post by ID."""
+    return _request(
+        "DELETE", f"/social-media-posting/{_location_id()}/posts/{post_id}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Universal escape hatch — any GHL API v2 endpoint
 # ---------------------------------------------------------------------------
 

@@ -19,6 +19,7 @@ a single sub-account (location).
 | Forms & surveys | `list_forms`, `list_form_submissions`, `list_surveys`, `list_survey_submissions` |
 | Funnels & links | `list_funnels`, `list_funnel_pages`, `list_trigger_links`, `create_trigger_link`, `list_media_files` |
 | Products & payments | `list_products`, `get_product`, `list_product_prices`, `list_invoices`, `get_invoice`, `list_payment_orders`, `list_payment_transactions`, `list_payment_subscriptions` |
+| Social Planner | `list_social_accounts`, `list_social_posts`, `get_social_post`, `create_social_post` (draft/scheduled/published), `delete_social_post` |
 | **Everything else** | `ghl_api_request` — a universal tool that can call **any** GHL API v2 endpoint your PIT scopes allow (blogs, courses, social planner, email templates, estimates, snapshots, …) |
 
 ## 1. Get your GHL credentials
