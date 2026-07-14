@@ -11,13 +11,17 @@ Required environment variables:
 """
 
 import os
+from pathlib import Path
 from typing import Any
 
 import httpx
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-load_dotenv()
+# Load the .env that sits next to this file, regardless of the working
+# directory the MCP client launches us from. override=True so the .env is the
+# source of truth even if a stale/empty value was injected into the environment.
+load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 
 BASE_URL = "https://services.leadconnectorhq.com"
 
